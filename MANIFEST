@@ -1,0 +1,17 @@
+AUTHORS
+Build.PL
+CHANGES
+INSTALL
+lib/Scalar/Footnote.pm
+lib/Scalar/Footnote.xs
+Makefile.PL
+MANIFEST			This list of files
+META.yml
+README
+t/01_basic.t
+t/02_footnote_types.t
+t/03_ref_types.t
+t/04_cleanups_and_overwrite.t
+t/lib/TestNote1.pm
+t/lib/TestNote2.pm
+TODO

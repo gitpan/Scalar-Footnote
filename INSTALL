@@ -1,0 +1,12 @@
+=============================
+ Installing Scalar::Footnote
+=============================
+
+The standard CPAN install applies:
+
+   $ perl Makefile.PL
+   $ make
+   $ make test
+   $ sudo make install
+
+As this is an XS extension, you'll need a C compiler.

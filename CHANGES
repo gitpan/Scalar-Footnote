@@ -1,0 +1,12 @@
+=============================
+ Scalar::Footnote Change Log
+=============================
+
+0.99_01
+  all changes by Steve Purkis unless otherwise noted
+    +	converted from Pixie::Info
+    +	added remove_footnote()
+    +	reworked XS to take a copy of the info scalar
+    +	loads more tests & docs
+
+Formerly Pixie::Info -- see Pixie changelog for more details.
