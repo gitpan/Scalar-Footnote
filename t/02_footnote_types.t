@@ -1,5 +1,5 @@
 ##
-## Scalar::Footnote - different types of footnote
+## Scalar::Footnote::Functions - different types of footnote
 ##
 
 use lib 't/lib';
@@ -11,7 +11,7 @@ use TestNote1;
 use Test::More   qw( no_plan );
 use Scalar::Util qw( weaken isweak );
 
-BEGIN { use_ok( 'Scalar::Footnote', qw( get_footnote set_footnote ) ); }
+BEGIN { use_ok( 'Scalar::Footnote::Functions', qw( get_footnote set_footnote ) ); }
 $/ = undef;
 
 ## note is const

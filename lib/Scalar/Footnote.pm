@@ -4,41 +4,164 @@ Scalar::Footnote - Attach hidden scalars to references
 
 =head1 SYNOPSIS
 
-  use Scalar::Footnote qw( set_footnote get_footnote remove_footnote );
+  use Data::Dumper;
+  use Scalar::Footnote;
 
-  my $ref = [];
+  my $obj = Foo->new;
 
-  # attach invisible footnote to $ref:
-  set_footnote( $ref, 'footnote' );
+  # attach invisible footnote to $obj:
+  $obj->Scalar::Footnote::set( my_key => 'my footnote' );
+  print Dumper( $obj );
 
   # get it back:
-  $footnote = get_footnote( $ref );
+  my $note = $obj->Scalar::Footnote::get( 'my_key' );
+  print "footnote: $note\n";
 
   # remove it:
-  $footnote = remove_footnote( $ref );
-
-  # or you can do things OO-stylee:
-  $obj->Scalar::Footnote::set_footnote( $a_value );
-  $note = Scalar::Footnote::get_footnote( $obj );
-  $note = $obj->Scalar::Footnote::get_footnote;
-  $note = $obj->Scalar::Footnote::remove_footnote;
+  my $note = $obj->Scalar::Footnote::remove( 'my_key' );
 
 =cut
 
 package Scalar::Footnote;
 
 use strict;
+use warnings;
 
-require Exporter;
-require DynaLoader;
-require AutoLoader;
+use Carp qw( carp croak confess );
+use Scalar::Footnote::Functions qw( get_footnote set_footnote remove_footnote );
 
-our @ISA       = qw( Exporter DynaLoader );
-our @EXPORT    = qw( );
-our @EXPORT_OK = qw( get_footnote set_footnote remove_footnote );
-our $VERSION   = '0.99_01';
+our $VERSION = '0.99_02';
 
-bootstrap Scalar::Footnote $VERSION;
+sub new {
+    my $class = shift;
+    my $self  = bless {}, $class;
+    $self->init( @_ );
+    return $self;
+}
+
+sub init { return $_[0]; }
+
+sub set_value_for {
+    my $self = shift;
+    my $key  = shift;
+    $self->{"$key"} = shift;
+    return $self;
+}
+
+sub get_value_for {
+    my $self = shift;
+    my $key  = shift;
+    $self->{"$key"};
+}
+
+sub remove_value_for {
+    my $self = shift;
+    my $key  = shift;
+    delete $self->{"$key"};
+}
+
+sub attach_to {
+    my $self = shift;
+    my $thing = shift;
+
+    croak( "can't set footnote object: '$thing' is not a ref!" ) unless ref( $thing );
+
+    set_footnote( $thing => $self );
+
+    return $self;
+}
+
+#-------------------------------------------------------------------------------
+# Class Methods
+#-------------------------------------------------------------------------------
+
+sub attach_new_footnote_object_to {
+    my $class = shift;
+    my $thing = shift;
+    return Scalar::Footnote->new->attach_to( $thing );
+}
+
+sub get_footnote_object_for {
+    my $class = shift;
+    my $thing = shift;
+
+    confess( "can't get footnote object: '$thing' is not a ref!" ) unless ref( $thing );
+
+    my $note = get_footnote( $thing );
+
+    return unless defined( $note );
+
+    croak( "footnote object for '$thing' is not a Scalar::Footnote object (it's '$note')" )
+      unless UNIVERSAL::isa( $note, 'Scalar::Footnote' );
+
+    return $note;
+}
+
+sub get_or_create_footnote_object_for {
+    my $class = shift;
+    my $thing = shift;
+    return $class->get_footnote_object_for( $thing ) ||
+           $class->attach_new_footnote_object_to( $thing );
+}
+
+#-------------------------------------------------------------------------------
+# Pseudo Class Methods
+#-------------------------------------------------------------------------------
+
+sub set {
+    my $thing = shift;
+    my $key   = shift;
+    my $value = shift;
+
+    croak( "can't set footnote for '$thing' - it's not a ref!" )
+      unless ref( $thing );
+
+    my $note = Scalar::Footnote->get_or_create_footnote_object_for( $thing );
+
+    $note->set_value_for( $key => $value );
+
+    return $thing;
+}
+
+sub get {
+    my $thing = shift;
+    my $key   = shift;
+
+    croak( "can't get footnote for '$thing' - it's not a ref!" )
+      unless ref( $thing );
+
+    my $note = Scalar::Footnote->get_footnote_object_for( $thing ) || return;
+
+    return $note->get_value_for( $key );
+}
+
+sub remove {
+    my $thing = shift;
+    my $key   = shift;
+
+    croak( "can't remove footnote for '$thing' - it's not a ref!" )
+      unless ref( $thing );
+
+    my $note = Scalar::Footnote->get_footnote_object_for( $thing ) || return;
+
+    return $note->remove_value_for( $key );
+}
+
+sub remove_all {
+    my $thing = shift;
+
+    croak( "can't remove all footnotes for '$thing' - it's not a ref!" )
+      unless ref( $thing );
+
+    my $note = remove_footnote( $thing );
+
+    return unless defined( $note );
+
+    carp( "footnote for '$thing' is not a Scalar::Footnote object (it's '$note')" )
+      unless UNIVERSAL::isa( $note, 'Scalar::Footnote' );
+
+    return $note;
+}
 
 1;
 
@@ -46,31 +169,31 @@ __END__
 
 =head1 DESCRIPTION
 
-C<Scalar::Footnote> lets you attach a scalar to an object (or any kind of
-reference, really).  This scalar I<footnote> is invisible from Perl for all
-intents and purposes, so for example, if you try dumping an object that has
-a footnote attached then you won't see it:
+C<Scalar::Footnote> lets you attach scalar I<footnotes> to an object (or any
+kind of reference, really) that are essentially invisible from Perl.  For
+example, if you try dumping an object that has a footnote attached to it, you
+won't actually see the footnote:
 
-  my $ref = [qw( foo bar )];
-  set_footnote( $ref, { a => 'footnote' } );
-  print Dumper( $ref );
+  my $obj = bless [qw( foo bar )], 'Foo';
+  $obj->Scalar::Footnote::set( 'Foo' => 'foo note' );
+  print Dumper( $obj );
 
 prints:
 
-  $VAR1 = [
+  $VAR1 = bless [
             'foo',
             'bar'
-          ];
+          ], 'Foo';
 
-If you destroy the $ref and you don't hold a copy of the footnote, it also
-gets destroyed:
+You can of course still access the footnote with L<Scalar::Footnote::get>.
 
-  my $ref = {};
-  set_footnote( $ref, MyFootnote->new );
-  $ref = undef; # footnote gets destroyed
+=head2 Footnote Keys
 
-As with most subs in Perl, L<set_footnote()> makes a copy of the footnote
-scalar you give it (earlier versions didn't).
+To avoid overwriting footnotes other people have created, you have to specify
+a key to store your footnote under.  You should pick something fairly unique,
+such as a namespace you're using:
+
+  $obj->Scalar::Footnote::set( 'My::Project' => 'foo note' );
 
 =head2 What Are Footnotes Attached To?
 
@@ -98,34 +221,97 @@ code refs have been tested.
 Pretty much any kind of scalar.  Constants, scalar refs, hash refs, array
 refs, and code refs have been tested.
 
-=head1 CAVEATS
+=head2 When Are Footnotes Destroyed?
 
-Watch out for circular references - L<Scalar::Util>'s weaken() is your friend,
-as is L<Data::Structure::Util>'s has_circular_ref() and curcular_off().
+Footnotes go away when the reference they're attached to goes away, unless
+you hold a copy of the footnote elsewhere:
 
-=head1 FUNCTIONS
+  my $ref  = {};
+  my $note = bless [qw( bar note )], 'Bar';
+  Scalar::Footnote::set( $ref, 'my footnote key' => $note );
+
+  $note = undef;
+  # $note is still accessible via Scalar::Footnote::get
+
+  $ref  = undef;
+  # $note is now destroyed
+
+=head1 CLASS METHODS / FUNCTIONS
+
+These are not quite class methods, but were intended to be used in an OO style.
 
 =over 4
 
-=item $ref = set_footnote( $ref, $footnote )
+=item $ref = Scalar::Footnote::set( $ref, $key => $footnote )
 
 Attaches $footnote to $ref (which B<must> be a reference), and overwrites any
 footnotes that were previously attached.  Dies if $ref is not a reference, or
 if there was an error.  Returns the $ref on success.
 
-=item $footnote = get_footnote( $ref )
+=item $footnote = Scalar::Footnote::get( $ref, $key )
 
 Gets the footnote attached to $ref (which B<must> be a reference).  Dies if
 $ref is not a reference, or if there was an error.  Returns the $footnote, or
 C<undef> if no footnote was attached.
 
-=item $footnote = remove_footnote( $ref )
+=item $footnote = Scalar::Footnote::remove( $ref, $key )
 
 Removes the footnote attached to $ref (which B<must> be a reference).  Dies if
 $ref is not a reference, or if there was an error.  Returns the removed
 $footnote, or C<undef> if no footnote was attached.
 
+=item $footnote_obj = Scalar::Footnote::remove_all( $ref )
+
+Removes all footnotes attached to $ref (which B<must> be a reference).  Dies if
+$ref is not a reference, or if there was an error.  Returns the removed
+C<Scalar::Footnote> object, or C<undef> if no footnote was attached.
+
+=item $footnote_obj = Scalar::Footnote->get_footnote_object_for( $ref )
+
+Returns the C<Scalar::Footnote> object attached to $ref (which B<must> be a
+reference) or C<undef> if no footnote was attached.  Dies if $ref is not a
+reference, or if there was an error.
+
+=item $footnote_obj = Scalar::Footnote->attach_new_footnote_object_to( $ref )
+
+Creates a new C<Scalar::Footnote> object and attaches it to $ref (which
+B<must> be a reference), overwriting any previous footnotes attached.  Dies if
+$ref is not a reference, or if there was an error.  Returns the new footnote
+object.
+
 =back
+
+=head1 INSTANCE METHODS
+
+These can be used on C<Scalar::Footnote> objects returned by any of the class
+methods above.  They return the footnote object unless otherwise specified.
+
+=over 4
+
+=item $footnote_obj->set_value_for( $key => $val )
+
+As in C< $footnotes{$key} = $val >.
+
+=item $val = $footnote_obj->get_value_for( $key )
+
+As in C< $footnotes{$key} >.
+
+=item $val = $footnote_obj->remove_value_for( $key )
+
+As in C< delete $footnotes{$key} >.
+
+=back
+
+=head1 CAVEATS
+
+Watch out for circular references - L<Scalar::Util>'s weaken() is your friend,
+as is L<Data::Structure::Util>'s has_circular_ref() and curcular_off().
+
+=head1 KNOWN BUGS
+
+Attempts to clone objects using L<Clone> dies with:
+
+  Don't know how to handle magic of type \37777777633 at ...
 
 =head1 AUTHORS
 
@@ -134,8 +320,8 @@ M. Friebe, original concept.
 Converted to L<Pixie> by Piers Cawley (changed the magic type, module name,
 stole the idea).
 
-Converted to Scalar::Footnote by Steve Purkis <spurkis@cpan.org>, updated to
-store a copy of the footnote.
+Converted to Scalar::Footnote by Steve Purkis <spurkis@cpan.org>, OO interface
+added, updated XS to store a copy of the footnote.
 
 =head1 SEE ALSO
 

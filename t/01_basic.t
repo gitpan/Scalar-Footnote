@@ -1,5 +1,5 @@
 ##
-## Scalar::Footnote - smoke tests
+## Scalar::Footnote::Functions - smoke tests
 ##
 
 use lib 't/lib';
@@ -10,7 +10,7 @@ use warnings;
 use Test::More   qw( no_plan );
 use Scalar::Util qw( weaken isweak );
 
-BEGIN { use_ok( 'Scalar::Footnote', qw( get_footnote set_footnote remove_footnote ) ); }
+BEGIN { use_ok( 'Scalar::Footnote::Functions', qw( get_footnote set_footnote remove_footnote ) ); }
 $/ = undef;
 
 ## smoke test

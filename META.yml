@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name: Scalar-Footnote
-version: 0.99_01
+version: 0.99_02
 author: ~
 abstract: Attach hidden scalars to references
 license: perl
@@ -13,5 +13,8 @@ build_requires:
 provides:
   Scalar::Footnote:
     file: lib/Scalar/Footnote.pm
-    version: 0.99_01
+    version: 0.99_02
+  Scalar::Footnote::Functions:
+    file: lib/Scalar/Footnote/Functions.pm
+    version: 0.99_02
 generated_by: Module::Build version 0.25

@@ -2,8 +2,17 @@
  Scalar::Footnote Change Log
 =============================
 
+All changes by Steve Purkis unless otherwise noted.
+
+0.99_02
+    +	API changed, NOT BACKWARDS COMPAT!
+	use Scalar::Footnote::Functions if you're already relying on this
+	module, though this is strongly deprecated!
+    +	Now attaches a Scalar::Footnote object by default, and keys footnotes
+	so we don't have to worry about overwriting other people's footnotes.
+
+
 0.99_01
-  all changes by Steve Purkis unless otherwise noted
     +	converted from Pixie::Info
     +	added remove_footnote()
     +	reworked XS to take a copy of the info scalar

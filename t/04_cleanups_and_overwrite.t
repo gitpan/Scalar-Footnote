@@ -1,5 +1,5 @@
 ##
-## Scalar::Footnote - test cleanups & overwriting
+## Scalar::Footnote::Functions - test cleanups & overwriting
 ##
 
 use lib 't/lib';
@@ -13,7 +13,7 @@ use Scalar::Util qw( weaken isweak );
 use TestNote1;
 use TestNote2;
 
-BEGIN { use_ok( 'Scalar::Footnote', qw( get_footnote set_footnote remove_footnote ) ); }
+BEGIN { use_ok( 'Scalar::Footnote::Functions', qw( get_footnote set_footnote remove_footnote ) ); }
 $/ = undef;
 
 ## refcounts & freeing sv's

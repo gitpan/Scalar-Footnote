@@ -2,7 +2,7 @@
 #include "perl.h"
 #include "XSUB.h"
 
-/* this number was reserved with p5p by Piers */
+/* this number was reserved with p5p by Piers Cawley */
 #define SCALAR_MAGIC_footnote (char)0x9b
 
 MAGIC*
@@ -40,7 +40,7 @@ _magic_freefootnote(pTHX_ SV* sv, MAGIC* mg) {
 
 MGVTBL vtbl_footnote = {0,0,0,0,MEMBER_TO_FPTR(_magic_freefootnote)};
 
-MODULE = Scalar::Footnote	PACKAGE = Scalar::Footnote
+MODULE = Scalar::Footnote::Functions	PACKAGE = Scalar::Footnote::Functions
 
 SV*
 set_footnote(ref, footnote)

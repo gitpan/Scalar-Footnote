@@ -1,5 +1,5 @@
 ##
-## Scalar::Footnote - test attach to different types of ref
+## Scalar::Footnote::Functions - test attach to different types of ref
 ##
 
 use lib 't/lib';
@@ -10,7 +10,7 @@ use warnings;
 use Test::More   qw( no_plan );
 use Scalar::Util qw( weaken isweak );
 
-BEGIN { use_ok( 'Scalar::Footnote', qw( get_footnote set_footnote ) ); }
+BEGIN { use_ok( 'Scalar::Footnote::Functions', qw( get_footnote set_footnote ) ); }
 $/ = undef;
 
 ## not a ref
